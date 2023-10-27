@@ -12,6 +12,7 @@ import account.AccountType;
 import customer.Customer;
 import customer.CustomerType;
 import exceptions.IllegalAmountException;
+import exceptions.InsufficientFundsException;
 import exceptions.TypeMismatchException;
 import factory.account.IAccountFactoryProvider;
 import factory.customer.ICustomerFactoryProvider;
@@ -72,7 +73,7 @@ public class Bank {
 		Account account = optionalAccount.get();
 		try {
 			account.withdraw(amount);
-		} catch (Exception e) {
+		} catch (IllegalAmountException | TypeMismatchException | InsufficientFundsException e) {
 			System.out.println(e.getMessage());
 		}
 
@@ -98,7 +99,7 @@ public class Bank {
 		Account accountTo = optionalAccountTo.get();
 		try {
 			account.transfer(accountTo, amount);
-		} catch (Exception e) {
+		} catch (IllegalAmountException | TypeMismatchException | InsufficientFundsException e) {
 			System.out.println(e.getMessage());
 		}
 	}

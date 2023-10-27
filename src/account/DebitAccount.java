@@ -3,6 +3,7 @@ package account;
 import customer.Customer;
 import exceptions.IllegalAmountException;
 import exceptions.InsufficientFundsException;
+import exceptions.TypeMismatchException;
 import transaction.TransactionType;
 
 public class DebitAccount extends Account {
@@ -12,7 +13,7 @@ public class DebitAccount extends Account {
 	}
 
 	@Override
-	public void withdraw(long amount) throws Exception {
+	public void withdraw(long amount) throws IllegalAmountException, TypeMismatchException, InsufficientFundsException {
 		long newBalance = calculateNewBalance(amount, TransactionType.WITHDRAW);
 		if (!checkAmount(amount)) {
 			throw new IllegalAmountException("Amount cannot be 0 or negative.");
