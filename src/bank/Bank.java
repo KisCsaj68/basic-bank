@@ -11,6 +11,8 @@ import account.Account;
 import account.AccountType;
 import customer.Customer;
 import customer.CustomerType;
+import exceptions.IllegalAmountException;
+import exceptions.TypeMismatchException;
 import factory.account.IAccountFactoryProvider;
 import factory.customer.ICustomerFactoryProvider;
 
@@ -56,7 +58,7 @@ public class Bank {
 		Account account = optionalAccount.get();
 		try {
 			account.deposit(amount);
-		} catch (Exception e) {
+		} catch (IllegalAmountException |  TypeMismatchException e) {
 			System.out.println(e.getMessage());
 		}
 	}
