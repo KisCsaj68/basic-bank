@@ -2,6 +2,7 @@ package bank;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.google.inject.Inject;
@@ -16,16 +17,13 @@ import factory.customer.ICustomerFactoryProvider;
 public class Bank {
 	private Map<String, Customer> customers;
 	private Map<UUID, Account> accounts;
-//	private String addresss;
 	private final ICustomerFactoryProvider customerFactoryProvider;
 	private final IAccountFactoryProvider accountFactoryProvider;
 
 	@Inject
-	public Bank(ICustomerFactoryProvider customerFactoryProvider,
-			IAccountFactoryProvider accountFactoryProvider) {
+	public Bank(ICustomerFactoryProvider customerFactoryProvider, IAccountFactoryProvider accountFactoryProvider) {
 		this.accounts = new HashMap<>();
 		this.customers = new HashMap<>();
-//		this.setAddresss(bankAddress);
 		this.customerFactoryProvider = customerFactoryProvider;
 		this.accountFactoryProvider = accountFactoryProvider;
 	}
@@ -34,7 +32,8 @@ public class Bank {
 		if (customers.containsKey(id)) {
 			return customers.get(id);
 		}
-		Customer customer = customerFactoryProvider.getCustomerFactory(type).registerCustomer(name, customerAddress, id);
+		Customer customer = customerFactoryProvider.getCustomerFactory(type).registerCustomer(name, customerAddress,
+				id);
 		customers.put(id, customer);
 		return customer;
 
@@ -47,18 +46,28 @@ public class Bank {
 		return accountNumber;
 
 	}
-//TODO handle exception when there is no key in the map!
+
 	public void cashDeposit(UUID accountNumber, long amount) {
-		Account account = accounts.get(accountNumber);
+		Optional<Account> optionalAccount = getAccount(accountNumber);
+		if (optionalAccount.isEmpty()) {
+			System.out.println(String.format("No account with number: %s", accountNumber));
+			return;
+		}
+		Account account = optionalAccount.get();
 		try {
-			((Account) account).deposit(amount);
+			account.deposit(amount);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
 	}
 
 	public void cashWithdraw(UUID accountNumber, long amount) {
-		Account account = accounts.get(accountNumber);
+		Optional<Account> optionalAccount = getAccount(accountNumber);
+		if (optionalAccount.isEmpty()) {
+			System.out.println(String.format("No account with number: %s", accountNumber));
+			return;
+		}
+		Account account = optionalAccount.get();
 		try {
 			account.withdraw(amount);
 		} catch (Exception e) {
@@ -66,10 +75,25 @@ public class Bank {
 		}
 
 	}
-	
+
 	public void cashTransfer(UUID fromAccount, UUID toAccount, long amount) {
-		Account account = accounts.get(fromAccount);
-		Account accountTo = accounts.get(toAccount);
+		Optional<Account> optionalAccountTo = getAccount(toAccount);
+		Optional<Account> optionalAccountFrom = getAccount(fromAccount);
+		if (optionalAccountTo.isEmpty() && optionalAccountFrom.isEmpty()) {
+			System.out.println(String.format("No account with number: %s", toAccount));
+			System.out.println(String.format("No account with number: %s", fromAccount));
+			return;
+		}
+		else if (optionalAccountTo.isEmpty()) {
+			System.out.println(String.format("No account with number: %s", toAccount));
+			return;
+		}
+		else if (optionalAccountFrom.isEmpty()) {
+			System.out.println(String.format("No account with number: %s", fromAccount));
+			return;
+		}
+		Account account = optionalAccountFrom.get();
+		Account accountTo = optionalAccountTo.get();
 		try {
 			account.transfer(accountTo, amount);
 		} catch (Exception e) {
@@ -78,16 +102,18 @@ public class Bank {
 	}
 
 	public void accountHistory(UUID accountNumber) {
-		Account account = accounts.get(accountNumber);
+		Optional<Account> optionalAccount = getAccount(accountNumber);
+		if (optionalAccount.isEmpty()) {
+			System.out.println(String.format("No account with number: %s", accountNumber));
+			return;
+		}
+		Account account = optionalAccount.get();
 		account.getHistory();
 	}
-
-//	public String getAddresss() {
-//		return addresss;
-//	}
-//
-//	public void setAddresss(String addresss) {
-//		this.addresss = addresss;
-//	}
+	
+	private Optional<Account> getAccount(UUID accountNumber) {
+		return Optional.ofNullable(accounts.get(accountNumber));
+		
+	}
 
 }
